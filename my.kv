@@ -1,0 +1,248 @@
+WindowManager:
+    MainWindow:
+    CameraWindow:
+    EditPhotoWindow:
+    EditScanWindow:
+    PrevScansWindow:
+    AlbumWindow:
+    ExportWindow:
+
+<MainWindow>:
+    name: "main"
+    GridLayout:
+        cols: 1
+        rows: 4
+        Label:
+            text: "Handy Remover"
+        Button:
+            text: "Scan New File"
+            on_release: 
+                app.root.current = "camera"
+                root.manager.transition.direction = "left"
+        Button:
+            text: "Import From Album"
+            on_release: 
+                app.root.current = "album"
+                root.manager.transition.direction = "left"
+        Button:
+            text: "See Old Scans"
+            on_release: 
+                app.root.current = "prev scans"
+                root.manager.transition.direction = "left"
+
+<CameraWindow>:
+    name: "camera"
+    BoxLayout: 
+        orientation: "vertical"
+        CameraClick:
+        BoxLayout:
+            size_hint: 1, 0.2
+            orientation: "horizontal"
+            Button: 
+                text: "cancel"
+                size: 150, 75
+                on_release: 
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "done"
+                size: 150, 75
+                on_release:
+                    app.root.current = "edit scan"
+                    root.manager.transition.direction = "left"
+
+<CameraClick>:
+    orientation: 'vertical'
+    Camera:
+        id: camera
+        resolution: (640, 480)
+        play: False
+    ToggleButton:
+        text: 'Play'
+        on_press: camera.play = not camera.play
+        size_hint_y: None
+        height: '48dp'
+    Button:
+        text: 'Capture'
+        size_hint_y: None
+        height: '48dp'
+        on_press: root.capture()
+
+<EditScanWindow>:
+    id: edit_scan
+    name: "edit scan"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint: 1, 0.15
+            orientation: "horizontal"
+            Button: 
+                text: "Add"
+                on_release:
+                    app.root.current = "camera"
+                    root.manager.transition.direction = "right"
+            Label: 
+                text: "1"
+                id: currImageNum
+            Button:
+                text: "Remove"
+                on_release:
+                    root.removeImage()
+        BoxLayout:
+            orientation: "horizontal"
+            Button: 
+                size_hint: 0.2, 1
+                text: "<"
+                on_release:
+                    root.prevImage()
+            Image: 
+                id: scanImageView   
+                size: self.texture_size
+                source: ""
+            Button: 
+                size_hint: 0.2, 1
+                text: ">"
+                on_release:
+                    root.nextImage()
+        BoxLayout: 
+            size_hint: 1, 0.5
+            orientation: "horizontal"
+            Button: 
+                text: "Reload"
+                on_release:
+                    root.reloadImage()
+            Button: 
+                text: "Done"
+                on_release:
+                    root.resetIndex()
+                    app.root.current = "edit photo"
+                    root.manager.transition.direction = "left"
+
+<EditPhotoWindow>:
+    name: "edit photo"
+    BoxLayout: 
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            Button: 
+                size_hint: 0.2, 1
+                text: "<"
+                on_release:
+                    root.prevImage()
+            Image: 
+                source: ""
+                id: scanPhotoView  
+            Button: 
+                size_hint: 0.2, 1
+                text: ">"
+                on_release:
+                    root.nextImage()
+        BoxLayout:
+            orientation: "vertical"
+            BoxLayout: 
+                size_hint: 1, 0.15
+                orientation: "horizontal"
+                Button: 
+                    text: "Remove Shadow"
+                    on_release: root.shadowButtonFunction()
+                Label: 
+                    text: "1"
+                    id: currPhotoNum
+                Button: 
+                    text: "Remove Handwriting"
+                    on_release: root.handButtonFunction()
+            
+            BoxLayout:
+                size_hint: 1, 0.15
+                orientation: "horizontal"
+                Button: 
+                    text: "Reload"
+                    on_release: 
+                        root.reloadImage()
+                Button: 
+                    text: "Done"
+                    on_release: 
+                        root.resetIndex()
+                        app.root.current = "export"
+                        root.manager.transition.direction = "left"
+
+<PrevScansWindow>:
+    name: "prev scans"
+    id: prev_scans
+    BoxLayout:
+        orientation: "vertical"
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True   
+            BoxLayout:
+                id: scans_scroll_view
+                orientation: "vertical"
+        BoxLayout:
+            size_hint: 1, 0.2
+            orientation: "horizontal"
+            Button: 
+                text: "reload"
+                on_release: 
+                    root.updatePrevScans()
+            Button: 
+                text: "cancel"
+                on_release: 
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+
+<AlbumWindow>:
+    name: "album"
+    BoxLayout:
+        orientation: 'vertical'
+        FileChooserIconView:
+            id: file_chooser
+            multiselect: True
+        
+        BoxLayout:
+            size_hint: 1, 0.2
+            orientation: "horizontal"
+            Button: 
+                text: "cancel"
+                on_release: 
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+  
+            Button: 
+                text: "done"
+                on_release: 
+                    root.selectionDone()
+                    app.root.current = "edit scan"
+                    root.manager.transition.direction = "left"
+     
+<ExportWindow>:
+    name: "export"
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Export As"
+        Button:
+            text: "PDF"
+            on_release:
+                root.toPDF()
+                root.exportDone()
+                app.root.current = "main"
+                root.manager.transition.direction = "left"
+        Button: 
+            text: "Image"
+            on_release:
+                root.toImage()
+                root.exportDone()
+                app.root.current = "main"
+                root.manager.transition.direction = "left"
+
+        Button: 
+            text: "Skip"
+            on_release:
+                root.exportDone()
+                app.root.current = "main"
+                root.manager.transition.direction = "left"
+
+        Label:
+            id: file_index_label
+            text: ""
+        
